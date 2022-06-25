@@ -1,0 +1,199 @@
+pipeline {
+    agent {
+         labels
+           {
+            node1
+            }
+        docker { image 'node:xyz-tomcat' }
+    }
+    stages {
+        stage('git checkout') {
+            steps {
+                'git branch: 'master',credentialsId: xxx, gitUrl:xxxx'
+            }
+        stage('maven build') {
+            steps {
+                sh mvn clean package
+            }
+	stage('docker deployment') {
+            steps {
+                sh 'docker login username password'
+                sh 'docker run -itd --name container1 -p 8081:8080 image'
+            }
+        }
+    }
+}
+
+
+-----------------------------------------------------
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+  labels:
+    xxx: appname
+spec:
+  containers:
+    - name: xxxx
+      image: nginx
+      ports:
+      - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xxx
+spec:
+  selector:
+    xxx: appname
+  
+
+
+ 
+
+------------------------------------------------------
+
+provider aws {
+  region: "us-east-1"
+}
+
+aws_ec2 "instance1" {
+  image: "ami-xxxxxx"
+  vpc_id: "xxxxx"
+  availablity_zones: "us-east-1a"
+  key_name: "xxx"
+  groups: ["securitygroup1"]
+  count: 1
+  allow_public_ip_address: True
+  wait: yes
+  
+
+-----------------------------------------------------------
+
+list = [2, 3.4, 6.55, 7, 9]
+a=list.sort()
+print(a)
+'''
+a=sorted(list)
+print(a)
+'''
+-------------------------------------------------------------
+
+file1 = open("myfile.txt") 
+print(file1.read())
+file1.close()
+
+
+----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+  labels:
+    xxx: appname
+spec:
+  containers:
+    - name: xxxx
+      image: nginx
+      ports:
+      - containerPort: 8085
+  restartPolicy: OnFailure
+
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: servicenmae
+spec:
+  type: LoadBalancer
+  selectors:
+    xxx: appname
+  ports:
+  - protocol: TCP
+    ports: 80
+    targetPort: 8085
+    nodePort: 30001
+
+
+---------------------------------------------------------
+
+file = open(sample.txt)
+print(file.read())
+file.close()
+
+
+--------------------------------------------------------------
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+  labels:
+    xxx: appname
+spec:
+  containers:
+    - name: xxxx
+      image: nginx
+      ports:
+      - containerPort: 8085
+   - name: xxx
+     image: mariadb
+     ports:
+     - containerPort: 3306
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service_name
+spec:
+  type: NodePort
+  selectors:
+    xxx: appname
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8085
+      nodePort: 30001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service_name
+spec:
+  selectors:
+    xxx: appname
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      
+      
+
+          
+
+

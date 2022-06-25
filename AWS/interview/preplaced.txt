@@ -1,0 +1,77 @@
+15 to 20 --> 80%
+
+1. ec2 billing -->"key pairs" (no resource)
+
+ec2   launch instance type size ebs  ->ASG ec2
+
+ebs  :-->
+IOPS 
+Throughput
+
+ec2 instance charge without 
+dedicated host --> issue os level --> multiple servers
+
+what env
+users
+many modules
+
+what is the code
+what tools to select
+---------------------------------------------------------------
+s3 
+react based static host website -->only accessible form only one ip address--> bucket policy
+
+acessible within vpn of croma--> ans: --> cidr_block bucket policy
+single bucket--> generated bills
+
+-------------------------------------------------------------------------------
+vpc
+
+pub -- pri 
+
+
+1000 employees of comp access cloud --> LDAP 
+AWS Org
+
+iam
+cloudwatch  
+cloudfront
+rds
+sqs sns
+dynamodb
+cloudformation
+--------------------------------------------------------------------------
+lamdba --> dynamodb integration
+
+cost
+security 
+reliability
+
+--------------------------------------------------
+security:
+iam roles -->policy devops testing 
+ssm --> 
+
+
+
+cost:
+select volumes/ instances types/ launch types/ reserved instance 
+
+
+
+reliability:
+------------------okay
+
+
+
+
+infra
+secur
+cost opt
+automation
+pipeline setup
+
+
+------------------------------------------------------------------------------------
+
+250+

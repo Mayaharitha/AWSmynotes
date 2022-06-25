@@ -1,0 +1,84 @@
+Creating an Amazon Aurora RDS Database (MySQL Compatible)
+----------------------------------------------------------
+Introduction
+In this hands-on lab, we will create an Aurora MySQL database. First, we will verify that the security groups, network ACL (NACL), and route tables are all configured to allow communication between an instance in a public subnet and an RDS database in a private subnet. After verifying the appropriate settings are in place, we will create the database. Once that is done, we will use an EC2 instance as a bastion to allow us to connect to our private database from an external source. We will utilize MySQL Workbench to connect to our private RDS Aurora database through the public EC2 bastion.
+
+Solution
+Log in to the live AWS environment using the credentials provided. Make sure you're in the N. Virginia (us-east-1) region throughout the lab.
+
+During the Aurora Database Creation steps, please ensure you have not selected "Easy Create" as this results in a default instance class selection of R5, which will result in an explicit deny.
+
+Download and install MySQL Workbench on your desktop. This application is necessary to connect to the MySQL database. You can download the file directly from MySQL.
+
+Be sure to select the correct operating system!
+
+For additional information regarding RDS database creation, please see the tutorial on AWS.
+
+Validate the Security Groups, Route Tables, and NACLs Are Configured Correctly
+In the search bar at the top, enter "ec2" and select EC2 from the search results dropdown.
+Select Instances (running).
+Select Bastion Host and expand the window that appears.
+Select the available subnet under Subnet ID.
+Select Public Subnet 1.
+Navigate to the Route Table tab and verify that there is both a local route and an internet gateway under Target.
+Navigate to the Network ACL tab and verify that the inbound and outbound allow all TCP traffic, and all other traffic is denied.
+Click the X icon next to the subnet ID filter.
+Select Private Subnet 1 and verify it only contains a local route.
+Select Security Groups from the left-hand menu, click on the box next to SSH, and verify this security group exists permitting SSH traffic to the bastion.
+Click on the box next to MySQL and confirm it is permitting Port range 3306 from Source 10.0.0.0/16.
+In the search bar at the top, enter "ec2" and select EC2 from the search results dropdown.
+Select Instances (running).
+Select Bastion Host and expand the window that appears.
+Navigate to the Security tab and verify it is using the SecurityGroupSSH security group.
+Create a Subnet Group for Your Aurora Cluster Containing Only Private Subnets
+In the search bar at the top, enter "rds" and open RDS from the search results dropdown in a new tab.
+Click Subnet groups in the left-hand menu and select Create DB Subnet Group.
+Set the following values:
+Name: AuroraLabSubnetGroup
+Description: AuroraLabSubnetGroup
+VPC: Select our VPC
+Select us-east-1b and us-east-1c under Availability Zones.
+Click on the Subnets dropdown menu and select both private subnets.
+Click Create.
+Create an Amazon Aurora Cluster
+Select Databases in the left-hand menu and click Create Database in the top-right corner. Exit out of any banners that appear at the top of your screen.
+Ensure the Amazon Aurora with MySQL compatibility is selected under Edition. Leave the other settings under Engine Options as default.
+Under Settings, set the following values:
+DB cluster identifier: AuroraLabCluster
+Master username: leave as admin
+Master password: Password1
+Under DB instance class, select Burstable classes (includes t classes).
+Click on the dropdown menu and select db.t3.small.
+Under Multi-AZ deployment, ensure Create an Aurora Replica or Reader node in a different AZ (recommended for scaled availability) is selected.
+Under Connectivity, ensure the Public access is set to No.
+Under Existing VPC security groups, click on the X next to the default security group, click on the dopdown menu, and select the MySQL security group. Leave other settings as default.
+Click Create database.
+Verify You’re Able to Authenticate to the Aurora Cluster
+Navigate to the EC2 Management Console and copy the Public IPv4 address.
+Navigate to the Instant Terminal (top right-hand corner) and log in using the provided cloud_user credentials provided.
+Navigate to the RDS AWS Console and click on the Regional cluster endpoint (you will see Regional under Role for this cluster endpoint).
+Under Endpoints, right-click and copy the writer endpoint.
+Navigate to the terminal and ensure the MySQL command line is installed:
+mysql --version
+Clear the terminal:
+clear
+Enter the following to authenticate to the Aurora Cluster:
+mysql -h <WRITER_ENDPOINT> -u admin -p
+Hit Enter, then provide your password.
+Once you are connected to the Aurora Cluster, enter:
+show databases;
+View the global variables:
+show global variables like 'aurora_server_id';
+Navigate to the RDS AWS Console > Databases to check if the reader instance Status is Available. (If you see Configuring-enhanced-monitoring, configuration is almost complete).
+Under Endpoints, right-click and copy the reader endpoint.
+Navigate to the terminal and exit MySQL:
+exit;
+Enter the following to connect to the reader endpoint:
+mysql -h <READER_ENDPOINT> -u admin -p
+Hit Enter, then provide your password.
+View the global variables:
+show global variables like 'aurora_server_id';
+Note: Because the reader instance Status is not yet available, you will still connect to the writer endpoint.
+
+Conclusion
+Congratulations on completing this hands-on lab!

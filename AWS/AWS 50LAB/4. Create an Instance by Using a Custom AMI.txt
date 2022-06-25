@@ -1,0 +1,7 @@
+Create an Instance by Using a Custom AMI 
+----------------------------------------
+
+Created a key pair for SSH access to a web server.
+Created an AMI from an existing instance.
+Created an EC2 instance from a custom AMI with two volumes Root & Data tags.
+Tagged an EBS volume.

@@ -1,0 +1,19 @@
+Manage AWS Logs by Using CloudTrail
+-------------------------------------
+1. Enable CloudTrail logging for Management events in your account by using the values in the following table. For any property that is not specified, use the default value.
+
+Setting	Value
+Trail name	LabTrail-24243527
+Trail log bucket and folder	labtrailbucket-24243527
+Log file SSE-KMS encryption	Disabled
+CloudWatch Logs	Enabled
+Log group name	LabTrailLog-24243527
+Role name	LabTrailRole-24243527
+
+2. You have accomplished the following:
+
+Enabled CloudTrail logging.
+Generated sample events.
+Displayed a CloudTrail log in CloudWatch.
+Exported log entries to a local CSV file.
+Viewed the event history in CloudTrail.

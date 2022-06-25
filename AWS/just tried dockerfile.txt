@@ -1,0 +1,26 @@
+FROM ubuntu
+MAINTAINER xxxx
+RUN yum install python-pip git iputils xxx -y
+WORKDIR /opt/sample
+ADD https://tomcat.xxxx.tar.gz .
+ADD /opt/sample/*.tar.gz .
+COPY sample.py .
+ENTRYPOINT ["/usr/bin/xxx", '-D']
+CMD ["python", sample.py]
+--->file
+
+
+docker build -t image_name file
+
+docker run -itd --name container1 -p 8081:8080 image_name  httpd
+
+
+
+FROM ubuntu
+MAINTAINER xxxx
+ENTRYPOINT ["yum", "install", "-y", "git"]
+CMD ["yum", "install", "-y", "python-pip"]
+
+
+docker run -itd --name container1 -p 8082:8080 image_name tree iputils epel-release
+

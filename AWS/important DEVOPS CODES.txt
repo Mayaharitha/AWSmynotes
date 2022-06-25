@@ -1,0 +1,496 @@
+------------------------------------------------------------------------------------
+
+pipeline {
+    tools {
+        maven 'maven3'
+     }
+    agent {
+         label 'nodename'
+        }
+     stages {
+         stage('git checkout') {
+              steps {
+                   'git branch: 'Master', credentialId: xxx, gitUrl: xxx'
+              }
+           }
+         stage('maven build') {
+              steps {
+                   sh 'mvn clean package'
+              }
+           }
+         stage('SonarQube analysis') {
+             steps {
+                sh 'mvn sonar:sonar'
+             }
+         }
+         stage('docker image build') {
+              steps {
+                   sh 'docker build -t image_name .'
+              }
+           }
+          stage('docker push image') {
+              steps {
+                   sh 'docker login -u username -p ${password}'
+                   sh 'docker tag username/image_name:verNo image_name'
+		   sh 'docker push username/image_name:verNo'
+              }
+           }
+          stage('Nexus push image') {
+              steps {
+                   sh 'docker login -u username -p ${password}  ipaddressNM:portNo'
+                   sh 'docker tag ipaddressNM:portNo/image_name:verNo image_name'
+		   sh 'docker push ipaddressNM:portNo/image_name:verNo'
+              }
+           }
+          stage('docker deployment') {
+              steps {
+                   sh 'docker run -itd --name container_name -p 8085:8080 image_name'
+              }
+           }
+       
+        }
+   } 
+
+
+
+------------------------------------------------------------------------------
+
+stage('remove existing container') {
+    step {
+         try {
+             sh 'docker rm -f container_name'
+         }
+         catch(error) {
+           // do nothing
+        }
+    }
+}
+      
+
+  
+----------------------------------------------------------------------
+
+
+node {
+    stage('git checkout') {
+        'git https://xxxxxxxxxx'
+    }
+    stage('maven build') {
+        def mvnHome = tool name : 'maven3' type : 'maven'
+        sh '$(mvnHome)/bin/mvn clean package'
+    }
+    stage('sonarQube analysis') {
+        withSonarQubeEnv('sonar') {
+        sh '$(mvnHome)/bin/mvn sonar:sonar'
+    }
+    stage('Docker Image Build') {
+        sh 'docker build -t image_name .'
+    }
+    stage('Docker Image Push') {
+        sh 'docker login -u username -p ${password}'
+        sh 'docker tag username/appname:versNo image_name' 
+        sh 'docker push username/appname:versNo'
+    }
+   stage('Nexus Image Push') {
+        sh 'docker login -u username -p ${Nexuspassword} ipaddress:portNo'
+        sh 'docker tag ipaddress:portNo/appname:versNo image_name' 
+        sh 'docker push ipaddress:portNo/appname:versNo'
+    }
+   stage('docker deployment') {
+        sh 'docker run -itd --name container_name -p 8085:8080 image_name'
+    }
+}
+
+
+-------------------------------------------------------------------------
+POD & SERVICE
+~~~~~~~~~~~~~~
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+  labels:
+    xxx: appname
+spec:
+  containers:
+    - name: xxxx
+      image: nginx
+      ports:
+      - containerPort: 8085
+  restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service_name
+spec:
+  type: LoadBalancer
+  selector:
+    xxx: appname
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8085
+    nodePort: 30001
+---------------------------------------------------------------------
+DEPLOYMENT
+~~~~~~~~~~~
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment_name
+  namespace: xxxxxxx
+  labels:
+    xxx: appname
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      xxx: appname
+  template:
+    metadata:
+      name: pod_name
+      labels:
+        xxx: appname
+    spec:
+      containers:
+        - name: xxxx
+          image: nginx
+          ports:
+          - conatinerPort: 80
+        - name: xxxx
+          image: rss-php-nginx:latest
+          ports:
+          - containerPort: 80
+
+
+====================================================
+CONFIGMAP & SECRETS:
+~~~~~~~~~~~~~~~~~~~~~
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19.1
+    ports:
+    - containerPort: 80
+  env:
+  - name: configMapVar
+    valueFrom:
+      configMapKeyRef:
+        name: xxxxxx
+        key: key2
+  - name: secretVar
+    valueFrom:
+      secretKeyRef:
+        name: my-secret
+        key: secrekey1
+  - name: secretVar
+    valueFrom:
+      secretKeyRef:
+        name: my-secret
+        key: secrekey2
+
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+  namespace: xxxxx
+  labels:
+    xxxx- appname
+spec:
+  containers:
+    - name: xxxx
+      image: redis
+      ports:
+      - containerPort: 8081
+    - volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config/configmap
+        - name: secret-volume
+          mountPath: /etc/config/secret
+  volumes:
+    - name: config-volume
+      configMap:
+        configMapName: my-configmap
+        defaultMode: 0770
+    - name: secret-volume
+      secret:
+        secretName:  xxxxx
+        defaultMode: 0400
+ 
+____________________________
+echo -n 'password' | base64 
+
+vi secret.yml
+
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: xxxxxx
+  name: my-secret
+type: Opaque
+data:
+  secretkey1: xxxxxx
+  secretkey2: xxxxxxx    
+
+kubectl create -f secret.yml
+kubectl get secrets -n namespace_name
+(or)
+directly from file --> kubectl create secret generic nginx-htpasswd --from-file .htpasswd 
+
+
+vi configmap.yml 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: xxxxxx
+  name: my-configmap
+data:
+ key1: xxxxxx
+ key2: |
+   fgjgdfdhhfjghgdggd
+   fgfggdxgxgdmgmhmhf
+   gmhhgmxmfdg,hjh,hgcg
+   gdjdtjhg,ksx
+   hfjtdjyhfgugdgddsffx
+
+kubectl create -f configmap.yml 
+_______________________________
+
+
+-------------------------------------------------------------------------
+Role & Role binding
+~~~~~~~~~~~~~~~~~~~
+
+apiVersion: rbac.authorization.k8s.io
+kind: Role
+metadata:
+  namespace: xxxxxx
+  name: my-rolename
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/logs"]
+  verbs: ["get", "watch", "list"]
+
+
+
+apiVersion: rbac.authorization.k8s.io
+kind: RoleBindingg
+metadata:
+  namespace: xxxxxx
+  name: rolebinding_name
+subjects:
+- kind: User
+  name: xxx
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: my-rolename
+  apiGroup: rbac.authorization.k8s.io
+----------------------------------------------------------------------------
+
+ServiceAccount
+~~~~~~~~~~~~~~~
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-serviceaccount
+  
+
+
+apiVersion: rbac.authorization.k8s.io
+kind: RoleBinding
+metadata:
+  name: sa-rolebind
+  namespace: xxxxx
+subjects:
+- kind: ServiceAccounts
+  name: my-serviceaccount
+  namespace: xxxxx
+roleRef:
+  kind: Role
+  name: my-rolename
+  apiGroup: rbac.authorization.k8s.io
+
+===========================================================================
+
+
+ANSIBLE PLAYBOOKS
+~~~~~~~~~~~~~~~~~
+
+
+---
+- name: application, run tomcat
+  hosts: dev_servers
+  remote_user: ec2-user
+  become: yes
+  gather_facts: False
+  tasks:
+    - name: install java
+      yum:
+        name: java-11-amazon-corrette-headless.x86_64
+        state: present
+    - name: download tomcat tar file
+      get_url:
+        url: https://tomact.xxxxxxxx
+        dest: /opt/
+        mode: '775'
+      unarchive:
+        src: /opt/*.tar.gz
+        dest: /opt/
+        mode: '777'
+    - name: start tomcat
+      shell: nohup /opt/apache-tomcat-9.../bin/startup.sh &
+    - name: copy contents to tomcat dir
+      copy:
+        src: /home/ec2-user/sample.war
+        dest: /opt/apache-tomcat-9.0..../webapps/sample
+        mode: '777'
+-------------------------------------------------------------------------------------
+
+Install Jenkins via Ansible :
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+---
+- name: installation of jenkins
+  hosts: app-server
+  remote_user: ec2-user
+  become: yes
+  vars:
+    port: 8085
+  tasks:
+    - name: configure jenkins repository
+      yum_repository:
+        name: jenkins
+        description: jenkins-repo
+        baseurl: https://xxxxxxx
+        gpgkey: https://xxxxxxx
+    - name: update server
+      yum:
+        name: '*'
+        state: latest
+    - name: install java & jenkins
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - java-11-amazon-corrette-headless.x86_64
+        - jenkins
+    - name: change port of jenkins
+      lineinfile:
+   	path: /etc/sysconfig/jenkins
+        regexp: '^JENKINS_PORT='
+        line: "JENKINS_PORT= {{ port }}"
+      notify: restart jenkins
+    - name: start jenkins
+      service:
+        name: jenkins
+        state: started
+  handlers:
+    - name: restart jenkins
+      service:
+         name: jenkins
+         state: restarted
+
+        
+======================================================================================
+Docker-compose
+~~~~~~~~~~~~~~
+
+version: '2'
+services: 
+  python-app:
+    image: xxx/python-app:ver1
+    container_name: python-app
+    ports:
+      - "8080:5000"
+    volumes
+      - /xxx/xx
+    networks:
+      - netxxx
+    depends_on:
+      - redis
+  redis:
+    image: xxxx/redis:1.2
+    container_name: redis
+    networks:
+      - netxxxx
+networks:
+  netxxxx:
+    driver: bridge
+
+
+docker-compose up -d --> command to run container using compose
+docker-compose down --> remove all svc/containers etc
+-----------------------------------------------------------------------------------
+
+Dockerfile:
+~~~~~~~~~~~
+
+
+FROM ubuntu:18.04
+MAINTAINER xxxxx
+RUN apt-get update
+RUN apt-get install vim unzip openssh-server -y
+RUN sed -i "s/PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
+RUN echo 'root:root123' | chpasswd 
+RUN mkdir /var/run/sshd
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+
+
+
+FROM node:carbon
+MAINTAINER xxxxxx
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install --only=production
+COPY . .
+EXPOSE 8080
+CMD ["npm", "start"]
+
+
+
+FROM node:14
+MAINTAINER xxxxxx
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 8080
+CMD ["node", "server.js"]
+
+
+FROM ubuntu:20.04
+MAINTAINER Mayaharitha
+WORKDIR /usr/src/apps
+RUN apt-get update && apt-get install nginx -y
+COPY sample.html .
+EXPOSE 80
+CMD ["nginx", "-D"]
+
+
+
+======================================================================
+
+lambda function
+~~~~~~~~~~~~~~~~~~
+
+
+import boto3
+s3 = boto3.client('s3')
+original = s3.get_object (
+bucket= 'xxxxx',
+key= 'xxxx'
+)
+print(original['Body'].read().decode('utf-8'))

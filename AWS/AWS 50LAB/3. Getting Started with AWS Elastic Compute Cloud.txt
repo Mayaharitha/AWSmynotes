@@ -1,0 +1,70 @@
+Getting Started with AWS Elastic Compute Cloud
+--------------------------------------------------
+
+First, you will configure an Amazon Elastic Compute Cloud (Amazon EC2) instance, and then you will create a custom Amazon Machine Image (AMI) based on the instance. Next, you will create a launch template, and then you will configure an Auto Scaling group. Finally, you will install a web server by using AWS System Manager Run Command, and then you will configure load balancing for the server farm. 
+
+
+1. Create KeyPair, SG --> Create EC2 with SG(SSH,HTTP) AND script for HTTPD
+#!/bin/bash
+yum install httpd -y
+chkconfig httpd on
+service httpd start
+
+check ipaddress --> test webpage apache
+
+2. Go to EC2 instance -->Select Actions, select Image and templates, and then select Create image--> customAMI.
+
+3. Launch new EC2 instance "Webserver from AMI" with customAMI which we created earlier in MyAMIs  --> check ipaddress --> test webpage apache  ; it should work
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. Create an Auto Scaling group by using a launch template
+Note: An Auto Scaling group is used to increase or decrease the number of instances that will service your workload.
+You can increase the number of instances based on a condition or based on a specific schedule. 
+The instances in your Auto Scaling group are created based on the configuration that you define in a launch template.
+This can include a custom AMI, a specific instance type, a key pair, and a security group.
+
+Create launch template --> select checkbox autoscaling guidance
+Create ASG --> give capacity units (min,desired, max)  and add scaling policy threshold
+
+ASG will launch instances based on desired
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. Install a web server by using AWS System Manager Run Command
+
+you will IAM role(policy=AmazonSSMManagedInstanceCore) and then you will attach the IAM role to the two running instances in the Auto Scaling group.
+Next, you will use Run Command to install a web server on the two instances.==> check ipaddress --> test webpage apache  ; it should work
+
+
+Note: An IAM role is an identity you can create that has specific permissions with credentials that are valid for short durations. Roles can be assumed by entities that you trust.
+
+6. Attach an IAM role to a running EC2 instance (which running under ASG)
+
+7. SSM run command
+shellscript
+#!/bin/bash
+yum -y update
+yum -y install httpd php
+chkconfig httpd on
+wget https://github.com/gr3yw01f/ec2-website/raw/master/phpapp.zip
+unzip phpapp.zip -d /var/www/html/
+service httpd start
+------------------------------------------------------------------------------------------------------------------------------
+
+8. Configure a scalable server farm by using load balancing
+
+create a target group of web server instances--> configure Elastic Load Balancing for the ASGwebserver instances.--> test the load balanced server farm means (traffic to switch between the servers)
+
+Note: load balancer increases the availability and fault tolerance of your applications by distributing workloads across the registered targets in the target group.
+
+
+
+
+
+
+
+Created an EC2 instance.
+Created a custom AMI based on an existing instance.
+Created an EC2 instance by using a custom AMI.
+Created a launch template.
+Configured an Auto Scaling group based on a launch template.
+Installed a web server on multiple instances by using Run Command.
+Configured an Application Load Balancer.

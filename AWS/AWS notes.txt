@@ -1,0 +1,183 @@
+General Purpose(gp2) --> 3IOPS per GiB, 16000IOPS per Volume, durability-99.9%, it balances cost & performance
+				usecase: boot disk, general applications 
+Provisioned IOPS--> io1 --> 50IOPS per GiB, 64000IOPS per Volume, durability-99.9%
+				usecase: latency senstive workloads, online transactions(OLTP), large databases
+	        --> io2 --> 500IOPS per GiB, 64000IOPS per Volume, more durability-99.999%
+Throughput Optimized HDD(st1) --> freqently accessed large data -->Baseline throughput 40MB/s per TB, 500MB/s per volume
+			usecase: big data, data warehouses, and ETL (extract, transform, and load), log processsing
+Cold HDD --> lowest cost -- Baseline throughput 12MB/s per TB, 250MB/s per volume
+	slow, low performance; usecase: less frequently access data
+
+--------------------------------------------------------------------------------------------------
+
+Application Load Balancer --> http/https protocol support; layer7 osi model(application layer)
+                              Intelligent/advanced routing(Host based/path based/ http header/ http method/ query string/ source Ip routing)
+			      able to forward traffic to specific TGs ; redirect(http-->https), direct static content
+Network Load Balancer --> costly, high performance, layer 4 osi model(transport layer), low latency
+			  support tcp/udp/tls protocols
+Classic Load Balancer --> support layer 7 functionality features like X-Forwarder-For-HTTP Headers, Sticky Sessions
+                     	  http/https and TCP support; legacy
+Gateway LoadBalancer --> load balance third party appliances, firewalls, IPS, intrusion detection, preventions systems etc
+
+Note:
+----
+X-forwarder-For-HTTP header-->if we need IP address of end user, we can find in  X-forwarder-For-HTTP header
+			    It will locate/find the orginating Ipaddress/ source IP which trying to access webserver(application) through LB
+Sticky Sessions --> stick cookies will Remain session between specific user to specific server by modifying ELB algoritm
+			usecase: access application session data stored locally in webserver  ex:online shopping site, online form filling
+
+
+----------------------------------------------------------------------------------------------------
+
+ClientSide Error --> 400 or 4xx error code; http request error
+		400 - bad request - something missing in http header request
+ 		408 - request timeout - user/customer failed to respond within idle timeout
+		464 - sending request from unsupported protocol
+ServerSide Error --> 500 or 5xx err code; issue on application/webserver or database
+		504 - gateway timeout --> ELB couldnt establish connection to target(web/app/database)  --> check application
+		503 - bad gateway --> target host is not reachable  --> check SGs of ELB & targets
+		502 - service unavailable --> no targets registered
+
+---------------------------------------------------------------------------------------------------
+
+Metrics of ELB:
+--------------
+Request count
+Healthy targetCount
+Unhealthy targetCount
+HTTP status codes
+Target Response Timeout
+
+Types of ELB algorithm:
+-----------------------
+Round Robin --> same type of request directing to same sized servers
+Least outstanding request (LOR)  --> different types of requests directing to different size servers
+ 					it will direct traffic to server which is having least outstanding no of requests
+
+------------------------------------------------------------------------------------------------------
+
+EC2 IMAGE BUILDER
+~~~~~~~~~~~~~~~~~~
+
+It automates process of building AMIs and contaimer images
+create image --> update image --> run tests(temp ec2) --> automatically
+
+image pipeline(configurations and seetings of image) + image receipe (source image) + image components(additional softwares)
+
+--------------------------------------------------------------------------------------------------------------------------
+
+CLOUDFORMATION:
+~~~~~~~~~~~~~~
+Version   --> 2010-09-09
+Description  --> any desc
+Metadata --> data about resource
+Parameters --> pass or input any parameter values (ex: EnvType; allowed values as test/prod/dev) or pass secrets or pass keyname etc
+Conditions --> specify some condition to provision resource (ex: !Ref EnvType prod ; if envtype is prod then provision some specific resource)
+Mappings   --> map resource (ex: if region is 'us-east-1' then map it to ami-xxxxxx)
+Transform  --> specify additional resources to be provisioned where code is located in s3 bucket (ex: additrional ELB, lambda code etc)
+Resources --> mandatory one --> instruct code to provision the resources
+Output  --> it will return output ; this o/p can be provide as i/p to other cloudformation templates
+	    ex: ec2 public ip, ec2 resource id etc
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+DEPLOYMENT TYPES:
+=================
+1. Blue green deployment
+   ~~~~~~~~~~~~~~~~~~~~~
+Blue --> current version
+Green --> newer version
+There will be two environments, blue env will server customer traffic ; testing will happen on green env
+all good then directing traffic from blue to green and blue will get deprecated
+if anyissues then redirect from green to blue (low downtime)
+
+2. Rolling Deployment
+   ~~~~~~~~~~~~~~~~~~~
+Doing changes on some servers/some part of environment and deploy new version to some servers as a batch and other will run old version
+later all batches will run new version
+--> cost low
+--> old version and new version will run side by side
+--> if any issues, rolling back to older version in all servers; will take time
+
+3. Canary Deployment
+   ~~~~~~~~~~~~~~~~~
+Deploying new version on only small set of servers and directing traffic to 10% of customers; if new version is okay; deploying it to all servers
+If not redirect 10% back to old version
+--> cost effective
+--> real testing with 10% of customersS
+--> if anyissues only 10% of customers only get effected
+--> rollback to old state instantly
+=========================================================================================
+CLOUDWATCH: (5mins interval metrics collection--> default)
+----------
+
+Operating s/m metrics  --> needs cloudwatch agent(port-8125) installed on the instance --> ex: cpu idletime, free memory, processes running, memory usage etc
+application metrics   
+
+normal metrics: --> network in/out, network packet In/Out, CPU utilisation, disk read/write IO, statuschecks, healthy/Unhealthy counts etc
+
+
+detailed monitoring --> granular metrics ~1sec (custom metrics)
+-----------------------------------------------------------------
+
+note: A log event consists of an event message and a timestamp.
+ A log stream is a sequence of log events from the same source.
+ A log group is a group of log streams that share the same retention and access control settings.
+
+==================================================================================================================================================================================
+S3 Versioning:
+-------------
+Maintains multiple versions of object
+It protect data from accidental deletion or updation
+Delete request will actually will not delete object; it create delete marker
+To delete --> need to delete with versionID
+
+MFA delete: protect accidental delete of object in s3/ enable Versioning/ disable Versioning --> with valid code from MFA device
+----------
+It is an extra layer of protecting s3 versioning
+It needs versioning to be enabled
+
+s3 Encryption: can enable during bucket creation or after creation
+--------------
+Data in transist --> SSL/TLS (HTTPS protocol)
+Data at rest--> ServerSideEncryption
+1. SSE-S3 ---> amnaged by s3 using AES-256bit encryption
+2. SSE-KMS --> managed by KMS keys
+3. SSE-C --> customer provided key (applicable CLI/AWS SDK/API to use SSE-C)
+Data at rest--> ClientSideEncryption--> you encrypt files locally before uploading into s3
+
+bucketkey(reduces cost; not by calling KMS API for encryption; everytime when new objects upload to s3 bucket) --> datakey --> s3 object
+Note:
+----
+VPC endpoint for s3 --> Resources within VPC can able to access s3 securely without sending traffic over internet
+
+==================================================================================================================================================================================
+EFS:Elastic File system  (enable encryption of EFS only during creation of EFS)--> encrytion/lifecycle policy will be enabled by default
+-------------------------
+file based storage
+port - NFS 2049
+
+It is for linux based workloads
+Multiple instances can access same file system at once via EFS; But, that is not possible via EBS
+Here, Multiple instances can locate accross AZ/ VPC/ Region or onprem
+
+Usecase: Applications can access shared file s/m for shared configuration files or state information
+Lifecycle EFS ==> EFS (frequently accessed) --> EFS Infrequently accessed(move after set period of time for cost optimization)
+~~~~~~~~~~~~~~~~~
+EFS Onezone (non critical)
+EFS one  zone-IA 
+
+FSx --> Shared file s/m for Windows
+---
+
+EC2 Instance -->EFS volume --> add EFS SG to port:NFS-2049 with EC2SG --> SSH into EC2 --> yum install amazon-efs-utils
+--> mkdir efs --> Go to EFS Console & attach --> it will give mount commands via dns/ip--> df -h
+
+Throughput EFS:
+-----------------
+1. Bursted throughput -->burst for peak workloads -> increases as file s/m size increases
+2. Provisioned throughput --> throughput that you want - for high performance applications
+
+Metered throughput --> blend of read requests & write requests
+			read operations 1:3 ratio of write requests
+==================================================================================================================================================================================

@@ -1,0 +1,60 @@
+Auditing Resource Compliance with AWS Config
+-----------------------------------------------
+Introduction
+In this hands-on lab, we'll implement AWS Config rules and use AWS Config for compliance auditing and remediation. We will configure compliance rules for evaluating EC2 instance type, if S3 versioning is enabled, EC2 instances in a VPC, and if CloudTrail is enabled. These rules will give you firsthand knowledge about how the AWS Config service works. We will then explore the configuration management aspect of AWS Config.
+
+Solution
+Log in to the AWS Management Console using the credentials provided on the lab instructions page. Make sure you're using the us-east-1 region.
+
+Enable AWS Config
+In the top-left corner of the page click Services, and under Management & Governance, click Config.
+Click Get Started.
+Leave the general settings as default and click Next.
+Click Next, and click Confirm.
+Once enabled, click View dashboard.
+Configure Rules for Resources
+In the left-hand menu click Rules.
+Click Add rule.
+In the search box, type "cloudtrail", select cloudtrail-enabled, and click Next.
+Leave the Configure rule settings as default, and click Next.
+Review the settings and click Add rule.
+Click Add rule.
+In the search box, type "desired", select desired-instance-type, and click Next.
+Under Parameters, for the InstanceType Key Value, enter "t2.micro" and click Next.
+Review the settings and click Add rule.
+Click Add rule.
+In the search box, type "ec2-instances", select ec2-instances-in-vpc, and click Next.
+Under Parameters, for the vpcid Key Value, enter the VPC ID for the VPC provided with the lab.
+Note: This can be found by navigating to the VPC section of the console under Your VPCs, and opening the details for the SysOpsVPC.
+
+Review the settings and click Add rule.
+Click Add rule.
+In the search box, type "versioning", select s3-bucket-versioning-enabled, and click Next.
+Leave the configure rule settings as default and click Next.
+Review the settings and click Add rule.
+Review the non-compliant rules.
+Configure the Non-Compliant Resources to Comply
+In the top-left corner of the page, open the Services menu, and click CloudTrail.
+In th left-hand menu, click Trails, and click Create trail.
+For the Trail name, enter "ConfigTrail".
+Disable the Log file SSE-KMS encrpytion setting. Keep other settings as default and click Next.
+Under Event Type, make sure that Management Events is selected, and that all read and write activity is logged.
+Click Next.
+Review the trail and click Create trail.
+In the top-left corner of the page, open the Services menu, and click S3.
+In the Buckets list, open the config-bucket S3 bucket.
+Click the Properties tab, and under Bucket Versioning, click Edit.
+Enable Bucket Versioning and click Save changes.
+Back in the Buckets list, open the cloudtrail-logs bucket.
+Click the Properties tab, and under Bucket Versioning, click Edit.
+Enable Bucket Versioning and click Save changes.
+Re-Evaluate the Non-Compliant Rules in AWS Config
+Navigate to the AWS Config Console, click Rules.
+Open the cloudtrail-enabled rule, and in the top-right corner, open the Actions menu.
+Click Re-evaluate. (This may take up to 10 minutes.)
+Back in the AWS Config Console, click Rules.
+Open the s3-bucket-versioning-enabled rule, and in the top-right corner, open the Actions menu.
+Click Re-evaluate.
+Review the rules and verify they are now compliant.
+Conclusion
+Congratulations — you've completed this hands-on lab!

@@ -1,0 +1,62 @@
+Create a VPC Endpoint and S3 Bucket in AWS
+-------------------------------------------
+Introduction
+In this hands-on lab, we will create a VPC endpoint and an S3 bucket to illustrate the benefits available for our cloud implementations. VPC endpoints can be used instead of NAT gateways to provide access to AWS resources. Many customers have legitimate privacy and security concerns about sending and receiving data across the public internet. VPC endpoints for S3 can alleviate these challenges by using the private IP address of an instance to access S3 with no exposure to the public internet.
+
+Solution
+Log in to the AWS Management Console using the credentials provided on the lab instructions page. Make sure you're using the us-east-1 Region.
+
+Create an S3 Bucket:
+1. Begin by navigating to EC2.
+2. In Resources, click Instances (running).
+3. Select the checkbox next to one of the instances.
+4. In Details below, notice that the Public IPv4 address field is either blank or has an address value. The instance that has the IPv4 address is the public instance, and the instance where this field is blank is the private instance.
+5. In the Name column at the top, click the blank field, and rename the instances to public and public accordingly.
+6. Navigate to S3.
+7. Click Create bucket.
+Click Create bucket.
+In Bucket name, create an S3 bucket beginning with the name vpcendpointbucket followed by random characters to ensure the bucket is globally unique.
+At the bottom, click Create bucket.
+Create a VPC Endpoint
+Navigate to VPC.
+From the left navigation, select Endpoints.
+Click Create Endpoint.
+Leave Service category as AWS services.
+For Service Name, search for and select com.amazonaws.us-east-1.s3 (with a Type of Gateway).
+For VPC, select the provided VPC from the dropdown.
+You have been provided with both a public and private route table for this lab. Before proceeding, you'll need to identify the private route table in VPC. Keep this tab open, but open another instance of VPC in a new tab.
+From the left navigation, select Route Tables.
+Select the route with no name (the other will be called Endpointrb).
+Select the Routes tab below. Note the Target shows only a local IP. This is the private table.
+Go back up to Name, click the blank field, and enter private.
+With the private route still selected, select the Subnet Associations tab below.
+Note: If you do not see an associated subnet, click Edit subnet
+
+associations. Select the one with private in the Route table ID, and click Save associations.
+
+Keep note of the subnet name for the following steps.
+Go back to your first browser tab with the VPC endpoint console.
+For Configure route tables, select the private subnet you just copied (the name you just noted will match the name in the Associated with column).
+Leave the rest of the fields as their defaults, and click Create endpoint.
+Click Close.
+Verify VPC Endpoint Access to S3
+From the VPC navigation menu, select Route Tables.
+
+Select the private route table.
+
+Select the Routes tab. Note that AWS has automatically updated the private route table with a route to the VPC endpoint.
+
+Note: If you do not see this right away, you may have to wait a minute and refresh to see the update.
+
+Open a terminal, and SSH into the public instance, replacing PUBLIC_IP_ADDRESS with the public IP address found in the Cloud Server of Public Instance section from your lab credentials (use the password from here as well):
+
+ssh cloud_user@<PUBLIC_IP_ADDRESS>
+From the public instance, SSH into the private instance using the private IP address and password found in the Cloud Server of Private Instance section from your lab credentials:
+
+ssh cloud_user@<PRIVATE_IP_ADDRESS>
+View the S3 bucket:
+
+aws s3 ls
+You should see the 2 S3 buckets — the one provided for the lab and the one you created.
+
+Conclusion

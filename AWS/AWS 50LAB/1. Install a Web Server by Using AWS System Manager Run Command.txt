@@ -1,0 +1,27 @@
+Install a Web Server by Using AWS System Manager Run Command
+--------------------------------------------------------------
+
+1. Create an IAM role named SSM-EC2 for the EC2 service by using the AmazonEC2RoleforSSM policy.
+
+2. Create Key-pair for EC2 (i.e WebServerKeyPair)
+
+3. Create a security group named WebSG that uses the Challenge VPC and the description Allows HTTP and SSH, and then configure two rules that will allow SSH and HTTP traffic from anywhere.
+
+4. Create 2 EC2 instances that use the Amazon Linux 2 AMI instance type, the Challenge VPC, the subnet-####### | Public 1 | us-east-2a subnet, and the WebSG security group, and then add a tag that has a key of Name and a value of WebServer.
+
+5. Attach the SSM-EC2 role to each of the running WebServer instances.
+
+6. Restart both instances.
+
+7. Configure AWS System Manager Run Command by using the AWS-RunShellScript, and then enter the following script as a command parameter
+
+#!/bin/bash
+yum -y install httpd
+chkconfig httpd on
+service httpd start
+
+
+NOTE:
+-----
+AWS System Manager Run Command allows you to send commands to multiple instances at the same time.
+

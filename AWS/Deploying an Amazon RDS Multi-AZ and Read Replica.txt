@@ -1,0 +1,65 @@
+Deploying an Amazon RDS Multi-AZ and Read Replica
+====================================================
+Introduction
+In this hands-on lab, we will work with Relational Database Service (RDS). This lab will provide you with hands-on experience with:
+
+Enabling Multi-AZ and backups
+Creating a read replica
+Promoting a read replica
+Updating the RDS endpoint in Route 53
+Multi-AZ is strictly for failover, as the standby instances cannot be read from by an application.
+ Read replicas are used for improved performance and migrations. With read replicas, you can write to the primary database and 
+read from the read replica. Because a read replica can be promoted to be the primary database, it makes for a great tool in 
+disaster recovery and migrations.
+
+Solution
+------------
+
+Log in to the live AWS environment using the credentials provided. Make sure you're in the N. Virginia (us-east-1) region throughout the lab.
+
+Enable Multi-AZ Deployment
+Navigate to EC2 > Load Balancers.
+Copy the DNS name of the load balancer.
+Open a new browser tab, and enter the DNS name.
+We will use this web page to test failovers and promotions in this lab.
+Back in the AWS console, navigate to RDS > Databases.
+Click on our database instance.
+Click Modify.
+
+Under Multi-AZ deployment, click Create a standby instance (recommended for production usage).
+Use a burstable class db.t3.micro instance.
+Click continue at the bottom of the page.
+Under Scheduling of modifications, select Apply immediately, and then click Modify DB Instance.
+
+Once the instance shows Multi-AZ status as Available (it could take about
+10 minutes), select the database instance.
+Click Actions > Reboot.
+On the reboot page, select Reboot With Failover?, and click Confirm.
+
+Create a Read Replica
+With the database instance still selected, click Actions > Create read replica.
+For Destination region, select US East (N. Virginia).
+In the Settings section, under DB instance identifier, enter "wordpress-rr".
+Leave the other defaults, and click Create read replica. It will take a few minutes for it to become available.
+Refresh the web page we navigated to earlier to see if our application is still there. It should be fine.
+
+Promote the Read Replica and Change the CNAME Records Set in Route 53 to the New Endpoint
+Once the read replica is available, check the circle next to it.
+
+Click Actions > Promote.
+Leave the defaults, and click Continue, and then click Promote Read Replica.
+Use the web page to monitor for downtime.
+Once the read replica is available, click to view it.
+In the Connectivity & security section, copy the endpoint.
+Navigate to Route 53 > Hosted zones.
+Select the private hosted zone.
+Select the db.mydomain.local record.
+Click Edit.
+Leave the Record name as db.
+Replace what's currently in the Value box with the endpoint you copied.
+Set the TTL to 60 seconds.
+Click Save changes.
+
+Monitor using the web page for downtime. (There shouldn't be any.)
+Conclusion
+Congratulations on completing this hands-on lab!

@@ -1,0 +1,95 @@
+Using CloudWatch for Resource Monitoring
+Introduction
+Welcome to this AWS hands-on lab for Using CloudWatch for Resource Monitoring!
+
+This lab provides practical experience with creating and configuring multiple custom AWS CloudWatch dashboards and widgets.
+
+The primary focus will be on the following features within CloudWatch:
+
+CloudWatch Dashboards
+Dashboard Widgets
+CloudWatch Metrics
+Solution
+Log in to the AWS Management Console using the credentials provided on the lab instructions page. Make sure you're using the us-east-1 region.
+Create a CloudWatch Dashboard for the DMZ Layer
+In the AWS Management Console, start typing "CloudWatch" into the search box and click on CloudWatch when it appears in the list.
+
+Click on Dashboards from the left-hand menu.
+
+Click Create dashboard.
+
+Under Dashboard name: enter "DMZLayer".
+
+Click Create dashboard.
+
+Select the Line option and click Next.
+
+Select Metrics and click Configure.
+
+Under All Metrics, select EC2.
+
+Click Per-Instance Metrics.
+
+In the filter box, enter "CPUUtilization".
+
+Select the box next to bastion-host.
+
+Click on custom at the top of the window and select 15 Minutes.
+
+Click Create widget.
+
+Click Save dashboard.
+
+Note: If 2 load balancers are present, select the load balancer with 0 as RequestCount.
+
+Create a CloudWatch Dashboard for the Application Layer
+Click on Metrics from the left-hand menu.
+Click EC2.
+Click Per-Instance Metrics.
+Find CPUUtilization under Metric Name and click the down arrow next to the name. Select Search for this only from the menu.
+Select the database instance and both instance-wordpress instances by clicking the boxes next to their names.
+Click on custom at the top of the window and select 15 Minutes.
+Click the dropdown at the top with the word Line displayed. Select Stacked area from the list of options.
+Click Actions in the top-right corner and select Add to dashboard.
+Click Create new under Select a dashboard. Enter "AppLayer" in the box that appears and then click the checkmark next to the box.
+Click Add to dashboard.
+Click Add widget.
+Select Number.
+Click Next.
+Click ApplicationELB.
+Click Per AppELB Metrics.
+Find RequestCount under Metric Name and click the down arrow next to RequestCount. Select Search for this only from the menu. Checkmark your load balancer.
+Click Create widget.
+Click Save dashboard.
+Click Add widget.
+Select Line.
+Select Metrics.
+Click Configure.
+Click EC2.
+Click Per-Instance Metrics.
+Find NetworkIn under Metric Name and click the down arrow next to NetworkIn. Select Search for this only from the menu.
+Select the database instance and both instance-wordpress instances by clicking the boxes next to their names.
+Click Create widget.
+Test the Widgets
+Navigate back to the EC2 Management Console in a second browser tab.
+Select Load Balancers in the left-hand menu.
+Under Description > Basic Configuration, copy the DNS name.
+Open a new tab and paste the load balancer DNS name.
+For English, click Continue.
+For Site Title, enter "Lab".
+For Username, enter "wpuser".
+For Password, enter "Password1".
+Click the box for Confirm use of weak password.
+For Your Email, enter "test@acloud.guru".
+Click Install WordPress.
+Click Log In.
+Enter the credentials just created and log in to the site.
+Navigate back to the CloudWatch Management Console tab.
+Click on the refresh icon for the CPUUtilization box.
+Click on the three dots in the top-right corner of the CPUUtilization box and select Edit.
+Click custom at the top-right corner and then select 15 Minutes.
+To configure Auto refresh, click on the down arrow next to the refresh icon and select 10 Seconds as the Refresh interval.
+Click Update widget.
+Click on the refresh icon for the CPUUtilization dashboard (this may take a few minutes). These values will show that you are now monitoring resources using CloudWatch.
+Conclusion
+Congratulations — you've completed this hands-on lab!

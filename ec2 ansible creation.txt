@@ -1,0 +1,28 @@
+---
+- name: craete ec2 instance
+  hosts: localhost
+  user: ec2-user
+  sudo: yes
+  gather_facts: no
+  vars:
+    region: "ap-south-1"
+    instance_type: "t2.micro"
+    image: "ami-079b5e5b3971bd10d"
+    key_name:"Mumbaikey"
+    vpc_subnet_id: "subnet-07750bb272328afec"
+    count: 1
+    group: "sg-07544b460aef42cb2"
+  tasks:
+    - name: creation of instance
+      ec2:
+        region: "{{ region }}"
+        instance_type: "{{ instance_type  }}"
+        image: "{{ image }}"
+        key_name:"{{ key_name }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        count: "{{ count }}"
+        group: "{{ group }}"
+        wait: yes
+        instance_tags:
+            Name: Webserver
+        register: ec2

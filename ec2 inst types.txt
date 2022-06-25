@@ -1,0 +1,6 @@
+r5,r5a -memory optimised --> ex:sap hana(inmemory databases), analytics)
+c -computer optimised --> supercomputers
+x - most demanding applications
+t,a -->general purpose
+g3,p3 -->ex:games applications
+h,d,i3 --> storage optimised

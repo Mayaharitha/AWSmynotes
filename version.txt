@@ -1,0 +1,4 @@
+jenkins 2.332.2
+terraform 1.1.8
+git 2.32.0
+java 8 or 11
